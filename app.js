@@ -14,7 +14,7 @@ const ObjectId = require("mongodb").ObjectId
 
 
 const app = express();
-const port = 3000 || process.env.port;
+const PORT = process.env.PORT || 3000 ;
 
 
 app.use(express.static('public'));
@@ -225,6 +225,6 @@ app.patch('/api/products/:id'), async (req, res) => {
 
 
 
-app.listen(port, () => {
-    console.log(`App listening on port: ${port}`);
+app.listen(PORT, () => {
+    console.log(`App listening on port: ${PORT}`);
 })
