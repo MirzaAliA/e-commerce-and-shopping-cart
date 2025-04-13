@@ -15,8 +15,6 @@ const bcrypt = require('bcryptjs');
 const ObjectId = require("mongodb").ObjectId
 const cors = require("cors");
 
-app.use(cors());
-
 
 const app = express();
 const PORT = process.env.PORT || 3000 ;
@@ -36,6 +34,8 @@ connectDB();
 app.use(expressLayouts);
 app.set('layout', './layouts/main');
 app.set('view engine', 'ejs');
+
+app.use(cors());
 
 
 app.use((req, res, next) => {
