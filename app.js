@@ -122,7 +122,7 @@ app.patch('api/auth/edit-account/:id', async (req, res) => {
     }
 })
 
-app.get('/api/products', authenticateUser, async (req, res) => {
+app.get('/api/products', async (req, res) => {
     try {
         const products = await Products.find();
         res.json(products);
