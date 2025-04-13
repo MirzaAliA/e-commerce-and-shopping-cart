@@ -13,6 +13,9 @@ const authenticateUser = require('./server/middleware/authenticateUser');
 const logoutUser = require('./server/middleware/logoutUser');
 const bcrypt = require('bcryptjs');
 const ObjectId = require("mongodb").ObjectId
+const cors = require("cors");
+
+app.use(cors());
 
 
 const app = express();
