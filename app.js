@@ -9,7 +9,7 @@ const Cart = require('./server/models/Cart');
 const User = require('./server/models/User');
 const authenticateUser = require('./server/middleware/authenticateUser');
 const logoutUser = require('./server/middleware/logoutUser');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const ObjectId = require("mongodb").ObjectId
 
 
