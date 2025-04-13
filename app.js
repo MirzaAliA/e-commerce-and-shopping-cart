@@ -7,6 +7,8 @@ const connectDB = require('./server/config/db');
 const Products = require('./server/models/Products');
 const Cart = require('./server/models/Cart');
 const User = require('./server/models/User');
+const Banners = require('./server/models/Banner');
+const Categorys = require('./server/models/Category');
 const authenticateUser = require('./server/middleware/authenticateUser');
 const logoutUser = require('./server/middleware/logoutUser');
 const bcrypt = require('bcryptjs');
@@ -186,32 +188,91 @@ app.put('/api/products/:id', async (req, res) => {
 
 
 // patch pending dulu
-app.patch('/api/products/:id'), async (req, res) => {
+// app.patch('/api/products/:id'), async (req, res) => {
+//     try {
+//         const id = req.params.id;
+//         // const { title, price, category, description, image } = req.body;
+//         const newData = req.body;
+//         const product = await Products.find({_id: `${id}`});
+
+//         console.log(product)
+
+//         for(let key in newData) {
+//             if(product.hasOwnProperty(key)) {
+//                 product[key] = newData[key];
+//             }
+//         }
+
+//         // if (product.modifiedCount == 0) {
+//         //     res.status(500).send({ message: 'Failed to find data' });
+//         // }
+
+//         // res.json(`${product.matchedCount} document(s) matched the filter, updated ${product.modifiedCount} document(s)`)
+//         res.json({ message: 'Product berhasil diupdate', product });
+//     }
+//     catch (error) {
+
+//     }
+// }
+
+//GET BANNER
+app.get('/api/banner', async (req, res) => {
     try {
-        const id = req.params.id;
-        // const { title, price, category, description, image } = req.body;
-        const newData = req.body;
-        const product = await Products.find({_id: `${id}`});
-
-        console.log(product)
-
-        for(let key in newData) {
-            if(product.hasOwnProperty(key)) {
-                product[key] = newData[key];
-            }
-        }
-
-        // if (product.modifiedCount == 0) {
-        //     res.status(500).send({ message: 'Failed to find data' });
-        // }
-
-        // res.json(`${product.matchedCount} document(s) matched the filter, updated ${product.modifiedCount} document(s)`)
-        res.json({ message: 'Product berhasil diupdate', product });
+        const banners = await Banners.find();
+        res.json(banners);
     }
     catch (error) {
-
+        console.error(error);
+        res.status(500).send({ message: 'Internal server error' });
     }
-}
+})
+
+app.post('/api/banner', async (req, res) => {
+    try {
+        const { image } = req.body;
+        const newData = { image };
+        const insertBanners = await Banners.create(newData)
+
+        if (insertBanners) {
+            return res.status(201).send({ message: 'Data stored successfully' });
+        }
+        res.status(500).send({ message: 'Failed to store data' });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Internal server error' });
+    }
+})
+
+//GET CATEGORY
+app.get('/api/category', async (req, res) => {
+    try {
+        const categorys = await Categorys.find();
+        res.json(categorys);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Internal server error' });
+    }
+})
+
+app.post('/api/category', async (req, res) => {
+    try {
+        const { description, image } = req.body;
+        const newData = { description, image };
+        const insertCategorys = await Categorys.create(newData)
+
+        if (insertCategorys) {
+            return res.status(201).send({ message: 'Data stored successfully' });
+        }
+        res.status(500).send({ message: 'Failed to store data' });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Internal server error' });
+    }
+})
+
 
 
 // Login page
