@@ -47,8 +47,63 @@ app.get('/login', async (req, res) => {
     })
 })
 
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: "Email field is required" });
+        } else if (!password) {
+            return res.status(400).json({ message: "Password field is required" });
+        }
+
+        const salt = await bcrypt.genSalt();
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const registerData = { email, password: hashedPassword };
+        const register = await User.create(registerData)
+
+        if (register) {
+            return res.status(201).json({ message: 'Register successfull!' })
+        }
+        res.status(500).json({ message: 'Failed to register' });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' })
+    }
+})
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email: email });
+        const payload = { _id: user.id, firstName: user.name.firstName, lastName: user.name.lastName, email, password }
+
+        if (user) {
+            if (email && await bcrypt.compare(password, user.password)) {
+                const token = jwt.sign(payload, process.env.MY_SECRET, { expiresIn: '24h' });
+
+                res.cookie('token', token, {
+                    httpOnly: true
+                })
+
+                return res.status(201).json({ token, message: 'Login successfull' });
+            } else {
+                return res.send({ message: 'User not allowed' });
+            }
+        } else {
+            return res.status(500).json({ message: 'User not found' })
+        }
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' })
+    }
+})
+
 app.get('/api/products', async (req, res) => {
-    try{
+    try {
         const products = await Products.find();
         res.json(products);
     }
@@ -59,7 +114,7 @@ app.get('/api/products', async (req, res) => {
 })
 
 app.get('/api/products/:id', async (req, res) => {
-    try{
+    try {
         const id = req.params.id;
         const product = await Products.findOne({ _id: id });
         if (!product) {
@@ -79,7 +134,7 @@ app.post('/api/products', async (req, res) => {
         const newData = { title, price, category, description, image };
         const insertProducts = await Products.create(newData)
 
-        if(insertProducts) {
+        if (insertProducts) {
             return res.status(201).send({ message: 'Data stored successfully' });
         }
         res.status(500).send({ message: 'Failed to store data' });
@@ -91,13 +146,13 @@ app.post('/api/products', async (req, res) => {
 })
 
 app.put('/api/products/:id', async (req, res) => {
-    try{
+    try {
         const id = req.params.id;
         const { title, price, category, description, image } = req.body;
         const newData = { title, price, category, description, image };
         const newProduct = await Products.replaceOne({ _id: id }, newData)
 
-        if(newProduct.modifiedCount == 0) {
+        if (newProduct.modifiedCount == 0) {
             res.status(500).send({ message: 'Failed to find data' });
         }
 
@@ -114,9 +169,9 @@ app.patch('/api/products/:id'), async (req, res) => {
         const id = req.params.id;
         const { title, price, category, description, image } = req.body;
         const newData = { title, price, category, description, image };
-        const newProduct = await Products.updateOne({ _id: id }, newData, {upsert: true});
+        const newProduct = await Products.updateOne({ _id: id }, newData, { upsert: true });
 
-        if(newProduct.modifiedCount == 0) {
+        if (newProduct.modifiedCount == 0) {
             res.status(500).send({ message: 'Failed to find data' });
         }
 
