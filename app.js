@@ -102,7 +102,27 @@ app.post('/api/auth/login', async (req, res) => {
     }
 })
 
-app.get('/api/products', async (req, res) => {
+app.patch('api/auth/edit-account/:id', async (req, res) => {
+    try{
+        const id = req.params.id;
+        const {email, username, password, name: {firstName, lastName}, address: {city, street, number, zipCode, geolocation: {lat, long}}, phone} = req.body;
+        const newData = {email, username, password, name: {firstName, lastName}, address: {city, street, number, zipCode, geolocation: {lat, long}}, phone};
+
+        const updateUser = await User.updateOne({ _id: id }, newData, { upsert: true });
+
+        if (updateUser.modifiedCount == 0) {
+            res.status(500).send({ message: 'Failed to find User' });
+        }
+
+        res.json(`Found document(s) matched the filter, updated ${updateUser.modifiedCount} document(s)`);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' })
+    }
+})
+
+app.get('/api/products', authenticateUser, async (req, res) => {
     try {
         const products = await Products.find();
         res.json(products);
@@ -164,18 +184,29 @@ app.put('/api/products/:id', async (req, res) => {
     }
 })
 
+
+// patch pending dulu
 app.patch('/api/products/:id'), async (req, res) => {
     try {
         const id = req.params.id;
-        const { title, price, category, description, image } = req.body;
-        const newData = { title, price, category, description, image };
-        const newProduct = await Products.updateOne({ _id: id }, newData, { upsert: true });
+        // const { title, price, category, description, image } = req.body;
+        const newData = req.body;
+        const product = await Products.find({_id: `${id}`});
 
-        if (newProduct.modifiedCount == 0) {
-            res.status(500).send({ message: 'Failed to find data' });
+        console.log(product)
+
+        for(let key in newData) {
+            if(product.hasOwnProperty(key)) {
+                product[key] = newData[key];
+            }
         }
 
-        res.json(`${newProduct.matchedCount} document(s) matched the filter, updated ${newProduct.modifiedCount} document(s)`)
+        // if (product.modifiedCount == 0) {
+        //     res.status(500).send({ message: 'Failed to find data' });
+        // }
+
+        // res.json(`${product.matchedCount} document(s) matched the filter, updated ${product.modifiedCount} document(s)`)
+        res.json({ message: 'Product berhasil diupdate', product });
     }
     catch (error) {
 
